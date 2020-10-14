@@ -1,9 +1,11 @@
 package MainTest
 
+import Main.Foos
 import org.scalatest.FunSuite
 
+
 class MainTest extends FunSuite {
-  test("OK"){
-      //OK
+  test("Foo"){
+      assert(Foos.Foo())
   }
 }
