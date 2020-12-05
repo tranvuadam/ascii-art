@@ -1,7 +1,7 @@
 package Main
 
 object Main extends App {
-  println("Hello there")
+  println("Hello there!")
 
 
 }
