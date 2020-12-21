@@ -1,8 +1,11 @@
 package Converter
 
-import Grids.{AsciiGrid, GreyColorGrid}
+import Grids.{AsciiGrid, GreyscaleGrid}
 
-object AsciiConverter{
+/**
+ * AsciiConverter converts greyscale values into their ascii value and returns an Ascii grid.
+ * */
+object AsciiConverter {
   val asciiTable = " .,:;ox%#@"
 
   def getAsciiValue(original_value : Int): Char ={
@@ -14,15 +17,15 @@ object AsciiConverter{
     asciiTable.charAt((255-value)*10/256)
   }
 
-  def convertGreyColorsToAscii(greyColorGrid: GreyColorGrid): AsciiGrid = {
-    val asciiArray = Array.ofDim[Char](greyColorGrid.height, greyColorGrid.width)
+  def apply(greyscaleGrid: GreyscaleGrid): AsciiGrid = {
+    val asciiArray = Array.ofDim[Char](greyscaleGrid.getHeight, greyscaleGrid.getWidth)
     for {
-      h1 <- (0 until greyColorGrid.height)
-      w1 <- (0 until greyColorGrid.width)
+      h1 <- (0 until greyscaleGrid.getHeight)
+      w1 <- (0 until greyscaleGrid.getWidth)
     } yield {
-      asciiArray(h1)(w1) = getAsciiValue(greyColorGrid.greyValues(h1)(w1))
+      asciiArray(h1)(w1) = getAsciiValue(greyscaleGrid.getValue(h1, w1))
     }
-    new AsciiGrid(greyColorGrid.width, greyColorGrid.height, asciiArray)
+    new AsciiGrid(greyscaleGrid.getHeight, greyscaleGrid.getWidth, asciiArray)
   }
 
 }

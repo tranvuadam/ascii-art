@@ -1,70 +1,89 @@
 package Filters
 
-import Grids.GreyColorGrid
-
+import Grids.GreyscaleGrid
 
 trait Filter{
-  def applyFilter(greyColorGrid: GreyColorGrid): GreyColorGrid
+  def applyFilter(greyColorGrid: GreyscaleGrid): GreyscaleGrid
 }
 
+/**
+ * Filter inverts greyscale value
+ * */
 class InvertFilter() extends Filter {
-  override def applyFilter(greyColorGrid: GreyColorGrid): GreyColorGrid = {
+  override def applyFilter(greyscaleGrid: GreyscaleGrid): GreyscaleGrid = {
+    val greyscaleAfterFilter = Array.ofDim[Int](greyscaleGrid.getHeight, greyscaleGrid.getWidth)
+
     for {
-      h1 <- (0 until greyColorGrid.height)
-      w1 <- (0 until greyColorGrid.width)
+      h1 <- (0 until greyscaleGrid.getWidth)
+      w1 <- (0 until greyscaleGrid.getWidth)
     } yield {
-      greyColorGrid.greyValues(h1)(w1) = 255 - greyColorGrid.greyValues(h1)(w1)
+      greyscaleAfterFilter(h1)(w1) = 255 - greyscaleGrid.getValue(h1, w1)
     }
-    greyColorGrid
+    new GreyscaleGrid(greyscaleGrid.getHeight, greyscaleGrid.getWidth, greyscaleAfterFilter)
   }
 }
 
+/**
+ * Filter adds brightness to greyscale values
+ * */
 class BrightnessFilter(brightness: String) extends Filter {
+require(brightness.toInt.isValidInt)
 
   def checkOverflow(value: Int): Int = if (value < 0) 0 else if(value > 255) 255 else value
 
-  override def applyFilter(greyColorGrid: GreyColorGrid): GreyColorGrid = {
+  override def applyFilter(greyscaleGrid: GreyscaleGrid): GreyscaleGrid = {
+    val greyscaleAfterFilter = Array.ofDim[Int](greyscaleGrid.getHeight, greyscaleGrid.getWidth)
+
     val brightnessValue = brightness.toInt
-    println(brightnessValue)
     for {
-      h1 <- (0 until greyColorGrid.height)
-      w1 <- (0 until greyColorGrid.width)
+      h1 <- (0 until greyscaleGrid.getHeight)
+      w1 <- (0 until greyscaleGrid.getWidth)
     } yield {
-      greyColorGrid.greyValues(h1)(w1) = checkOverflow(greyColorGrid.greyValues(h1)(w1) + brightnessValue)
+      greyscaleAfterFilter(h1)(w1) = checkOverflow(greyscaleGrid.getValue(h1, w1) + brightnessValue)
     }
-    greyColorGrid
+    new GreyscaleGrid(greyscaleGrid.getHeight, greyscaleGrid.getWidth, greyscaleAfterFilter)
   }
 }
 
+/**
+ * Filter flips greyscale grid on X/Y axes
+ * */
 class FlipFilter(axis: String) extends Filter {
-  override def applyFilter(greyColorGrid: GreyColorGrid): GreyColorGrid = {
+  require(axis.toUpperCase == "Y" || axis.toUpperCase == "X")
+
+  override def applyFilter(greyColorGrid: GreyscaleGrid): GreyscaleGrid = {
     if(axis.toUpperCase == "Y")
       flipVertically(greyColorGrid)
-    else if(axis.toUpperCase == "X")
+    else
       flipHorizontally(greyColorGrid)
-    else throw new IllegalArgumentException("Invalid Flip filter option! Available arguments: y/x")
   }
 
-  def flipHorizontally(grid: GreyColorGrid): GreyColorGrid ={
+  def flipHorizontally(greyscaleGrid: GreyscaleGrid): GreyscaleGrid ={
+    val greyscaleAfterFilter = greyscaleGrid.getGrid
+
     for{
-      y <- 0 until grid.width
-      x <- 0 until grid.height/2
+      y <- 0 until greyscaleGrid.getWidth
+      x <- 0 until greyscaleGrid.getHeight/2
     }yield{
-      val tmpChar = grid.greyValues(grid.height-x-1)(y)
-      grid.greyValues(grid.height-x-1)(y) = grid.greyValues(x)(y)
-      grid.greyValues(x)(y) = tmpChar
+      val tmpChar = greyscaleGrid.getValue(greyscaleGrid.getHeight-x-1, y)
+      greyscaleAfterFilter(greyscaleGrid.getHeight-x-1)(y) = greyscaleGrid.getValue(x, y)
+      greyscaleAfterFilter(x)(y) = tmpChar
     }
-    grid
+
+    new GreyscaleGrid(greyscaleGrid.getHeight, greyscaleGrid.getWidth, greyscaleAfterFilter)
   }
-  def flipVertically(grid: GreyColorGrid): GreyColorGrid ={
+  def flipVertically(greyscaleGrid: GreyscaleGrid): GreyscaleGrid ={
+    val greyscaleAfterFilter = greyscaleGrid.getGrid
+
     for{
-      x <- 0 until grid.height
-      y <- 0 until grid.width/2
+      x <- 0 until greyscaleGrid.getHeight
+      y <- 0 until greyscaleGrid.getWidth/2
     }yield{
-      val tmpChar = grid.greyValues(x)(grid.width - y - 1)
-      grid.greyValues(x)(grid.width - y - 1) = grid.greyValues(x)(y)
-      grid.greyValues(x)(y) = tmpChar
+      val tmpChar = greyscaleGrid.getValue(x, greyscaleGrid.getWidth - y - 1)
+      greyscaleAfterFilter(x)(greyscaleGrid.getWidth - y - 1) = greyscaleGrid.getValue(x, y)
+      greyscaleAfterFilter(x)(y) = tmpChar
     }
-    grid
+
+    new GreyscaleGrid(greyscaleGrid.getHeight, greyscaleGrid.getWidth, greyscaleAfterFilter)
   }
 }

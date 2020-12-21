@@ -1,9 +1,14 @@
 package InputHandler
 
-import Main.ArgumentController
+import java.awt.image.BufferedImage
 
+/**
+ * InputController extracts extension from path and checks if extension is supported and returns appropriate ImageHandler
+ * */
 object InputController{
-
+  /**
+   * Method to get extension (last substring of path starting with ".")
+   * */
   def getExtension(path: String): String ={
     var extension = ""
     val i = path.lastIndexOf('.')
@@ -11,18 +16,13 @@ object InputController{
     extension
   }
 
-  def apply(arguments_controller: ArgumentController): InputImageHandler =  {
-    if(arguments_controller.getNextArgument == "--image"){
-      val path = arguments_controller.getNextArgument
-      val extension = getExtension(path)
-      val handler = extension.toUpperCase match {
-        case "JPG" => new JPEGHandler
-        case "PNG" => new PNGHandler
-        case _ => throw new IllegalArgumentException("Invalid file format.")
-      }
-      handler.setPath(path)
-      handler
-    }else
-      throw new IllegalArgumentException("Incorrect arguments.")
+  def apply(path: String): BufferedImage = {
+    val extension = getExtension(path)
+    val imageHandler = extension.toUpperCase match {
+      case "JPG" => new JPEGHandler
+      case "PNG" => new PNGHandler
+      case _ => throw new IllegalArgumentException("Unsupported file format.")
+    }
+    imageHandler.load(path)
   }
 }
